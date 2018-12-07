@@ -80,4 +80,9 @@ subject to potential_power{i in DFFR_PRICE, j in DA_PRICE, t in INTERVALS}:
 
 subject to pDFFR_ub{i in DFFR_PRICE}:
     Q_R[i] <= Ramp_DFFR;
-    
+
+subject to max_Ramp_up[i in DFFR_PRICE, j in DA_PRICE, t in INTERVALS: t>=2]:
+    P_Act[i,j,t]-Q_DA[i,j,t-1]<=R;
+
+subject to max_Ramp_down[i in DFFR_PRICE, j in DA_PRICE, t in INTERVALS: t>=2]:
+    Q_DA[i,j,t]-P_Act[i,j,t-1]>=-R;
