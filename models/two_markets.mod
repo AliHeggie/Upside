@@ -21,15 +21,16 @@ param P_MAX;
 
 # --- variables ---
 var q_R >=0; # Quantity bid in DFFR market
+var q_DA{DA_PRICE, INTERVALS} >=0; # Quantity bid in DFFR market
 var d_R{DFFR_PRICE} binary; # bidding level in DFFR market
 var d_DA{DFFR_PRICE,DA_PRICE,INTERVALS} binary;
 var Q_R{DFFR_PRICE} >= 0; # Quantity accepted in DFFR market
+var Q_DA{DA_PRICE,INTERVALS} >=0; # Quantity accepted in day ahead market
 var P_Act{DFFR_PRICE,DA_PRICE,INTERVALS}>=0;
 
-#var q_DA; # Quantity bid in day ahead market
-#var d_DA{DA_PRICE, INTERVALS} binary; # bidding level in day ahead market
-#var Q_DA{DA_PRICE}; # Quantity accepted in day ahead market
-#var E_price_DA{DA_PRICE, INTERVALS}; # expected price conditional on our bid
+var Z_R{DFFR_PRICE}>=0;  ## auxilliary variables to  linearize delta * q for dffr
+var Z_DA{DFFR_PRICE,DA_PRICE,INTERVALS}>=0; ## auxilliary variables to  linearize delta * q for dffr
+
 
 # --- objective function ---
 maximize profit: sum{i in DFFR_PRICE} E_price_R[i] * q_R * d_R[i] +
@@ -46,8 +47,18 @@ subject to single_bid_R:
 # Accepted DFFR bid
 subject to accepted_R{i in DFFR_PRICE diff {first(DFFR_PRICE)}}:
     Q_R[i] >= Q_R[i-1];
-subject to accepted_R_lb{i in DFFR_PRICE}:
-    Q_R[i] >= d_R[i] * q_R;
+#subject to accepted_R_lb{i in DFFR_PRICE}:
+#    Q_R[i] >= d_R[i] * q_R;
+
+### LINEARIZATION of accepted_R_lb
+s.t. DFFR_Lin1{i in DFFR_PRICE}:
+    Z_R[i]<=q_R[i];
+
+s.t. DFFR_Lin2{i in DFFR_PRICE}:
+    Z_R[i]>=q_R[i]-(1-d_R[i])*P_MAX;
+
+###
+
 subject to accepted_R_ub{i in DFFR_PRICE}:
     Q_R[i] <= q_R;
 
@@ -64,8 +75,18 @@ subject to accepted_DA{i in DFFR_PRICE, j in DA_PRICE diff {first(DA_PRICE)},
                        t in INTERVALS}:
     Q_DA[i,j,t] >= Q_DA[i, j-1, t];
 
-subject to accepted_DA_lb{i in DFFR_PRICE, j in DA_PRICE , t in INTERVALS}:
-    Q_DA[i,j,t] >= d_DA[i,j,t] * q_DA[i,t];
+#subject to accepted_DA_lb{i in DFFR_PRICE, j in DA_PRICE , t in INTERVALS}:
+#    Q_DA[i,j,t] >= d_DA[i,j,t] * q_DA[i,t];
+
+### LINEARIZATION of accepted_DA_lb
+s.t. DA_Lin1{i in DFFR_PRICE, j in DA_PRICE, t in INTERVALS}:
+    Z_DA[i,j,t]<=q_R[i];
+
+s.t. DA_Lin2{i in DFFR_PRICE, j in DA_PRICE, t in INTVERVALS}:
+    Z_DA[i,j,t]>=q_DA[j,t]-(1-d_DA[i,j,t])*P_MAX;
+    ###
+
+
 
 subject to accepted_DA_ub{i in DFFR_PRICE, j in DA_PRICE , t in INTERVALS}:
     Q_DA[i,j,t] <= q_DA[i,t];
