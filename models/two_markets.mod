@@ -20,16 +20,16 @@ param E_price_DA{j in DA_PRICE, t in INTERVALS}= sum{k in DA_PRICE: k>=j} price_
 param P_MAX;
 
 # --- variables ---
-var q_R >=0; # Quantity bid in DFFR market
-var q_DA{DA_PRICE, INTERVALS} >=0; # Quantity bid in DFFR market
+var q_R >=0, <=10000000; # Quantity bid in DFFR market
+var q_DA{DA_PRICE, INTERVALS} >=0, <=10000000; # Quantity bid in DFFR market
 var d_R{DFFR_PRICE} binary; # bidding level in DFFR market
 var d_DA{DFFR_PRICE,DA_PRICE,INTERVALS} binary;
-var Q_R{DFFR_PRICE} >= 0; # Quantity accepted in DFFR market
-var Q_DA{DFFR_PRICE,DA_PRICE,INTERVALS} >=0; # Quantity accepted in day ahead market
-var P_Act{DFFR_PRICE,DA_PRICE,INTERVALS}>=0;
+var Q_R{DFFR_PRICE} >= 0, <=10000000; # Quantity accepted in DFFR market
+var Q_DA{DFFR_PRICE,DA_PRICE,INTERVALS} >=0, <=10000000; # Quantity accepted in day ahead market
+var P_Act{DFFR_PRICE,DA_PRICE,INTERVALS}>=0, <=10000000;
 
-var Z_R{DFFR_PRICE}>=0;  ## auxilliary variables to  linearize delta * q for dffr
-var Z_DA{DFFR_PRICE,DA_PRICE,INTERVALS}>=0; ## auxilliary variables to  linearize delta * q for dffr
+var Z_R{DFFR_PRICE}>=0, <=10000000;  ## auxilliary variables to  linearize delta * q for dffr
+var Z_DA{DFFR_PRICE,DA_PRICE,INTERVALS}>=0, <=10000000; ## auxilliary variables to  linearize delta * q for dffr
 
 
 # --- objective function ---
@@ -116,3 +116,9 @@ subject to max_Ramp_up{i in DFFR_PRICE, j in DA_PRICE, t in INTERVALS: t>=2}:
 
 subject to max_Ramp_down{i in DFFR_PRICE, j in DA_PRICE, t in INTERVALS: t>=2}:
     Q_DA[i,j,t]-P_Act[i,j,t-1]>=-Ramp;
+
+s.t. q_R_upper_bound:
+    q_R <= P_MAX;
+
+s.t. q_DA_upper_bound{i in DA_PRICE, t in INTERVALS}:
+    q_DA[i,t] <= P_MAX;
