@@ -4,23 +4,35 @@ set DA_PRICE ordered; # Day ahaead market price scenarios
 set INTERVALS; # Trading intervals
 
 # --- parameters ---
-param price_R{DFFR_PRICE};
-#param price_DA{DA_PRICE, INTERVALS};
-param p_R{DFFR_PRICE}; #probability of DFFR scenarios
-param p_DA{DA_PRICE,INTERVALS}; # probabilty of day ahead scenarios
+param Cost; #cost of generation
+param price_R{DFFR_PRICE}; #price for scenario of DFFR
+param price_DA{DA_PRICE, INTERVALS}; #price for scenario of DA
+
+param p_R{DFFR_PRICE}; # probability of DFFR scenarios
+param p_DA{DA_PRICE}; # probabilty of day ahead scenarios
+
+param Ramp; # Ramp power limits in interval;
+param Ramp_DFFR; # Ramp power limits for DFFR;
+
+param E_price_R{i in DFFR_PRICE}= price_R[i]*sum{k in DFFR_PRICE: k>=i} p_DA[k]; # expected price conditional on our bid
+param E_price_DA{j in DA_PRICE, t in INTERVALS}= sum{k in DA_PRICE: k>=j} price_DA[k,t]*p_DA[k]; # expected price conditional on our bid
+
 
 # --- variables ---
 var q_R >=0; # Quantity bid in DFFR market
 var d_R{DFFR_PRICE} binary; # bidding level in DFFR market
+var d_DA{DFFR_PRICE,DA_PRICE,INTERVALS} binary;
 var Q_R{DFFR_PRICE} >= 0; # Quantity accepted in DFFR market
-var E_price_R{DFFR_PRICE} >= 0; # expected price conditional on our bid
 #var q_DA; # Quantity bid in day ahead market
 #var d_DA{DA_PRICE, INTERVALS} binary; # bidding level in day ahead market
 #var Q_DA{DA_PRICE}; # Quantity accepted in day ahead market
 #var E_price_DA{DA_PRICE, INTERVALS}; # expected price conditional on our bid
 
 # --- objective function ---
-maximize profit: sum{i in DFFR_PRICE} E_price_R[i] * q_R * d_R[i];
+maximize profit: sum{i in DFFR_PRICE} E_price_R[i] * q_R * d_R[i] +
+sum{i in DFFR_PRICE} p_R[i] * sum{j in DA_PRICE, t in INTERVALS} E_price_DA[j,t] * q_DA[i,t] * d_DA[i,j,t] -
+sum{i in DFFR_PRICE, j in DA_PRICE, t in INTERVALS} p_R[i] * p_DA[j,t] * Cost * Q_DA[i,j,t]
+;
 
 # DFFR MARKET
 
