@@ -1,0 +1,76 @@
+# Useful `.gitignore` templates:
+# https://github.com/github/gitignore
+
+
+# ----------------------------------------------------------------------
+# | General                                                            |
+# ----------------------------------------------------------------------
+
+# To ignore all data, we can use the following syntax.
+# *.csv
+# *.png
+# *.svg
+
+# Directory can be ommitted as well.
+# out
+# bin
+# obj
+
+# Some file can be added to repository by following expression.
+# !data/power_demand.csv
+
+
+
+# ----------------------------------------------------------------------
+# | Programming language                                               |
+# ----------------------------------------------------------------------
+
+# Vim                                                                |
+%*
+*.sw[a-z]
+*.un~
+.netrwhist
+Session.vim
+
+
+# jupyter
+.ipynb_checkpoints
+
+
+# python
+__pycache__
+*.pyc
+
+
+
+# ----------------------------------------------------------------------
+# | Linux                                                              |
+# ----------------------------------------------------------------------
+
+*~
+
+
+
+# ----------------------------------------------------------------------
+# | macOS                                                              |
+# ----------------------------------------------------------------------
+
+._*
+.AppleDouble
+.DS_Store
+.localized
+.LSOverride
+.Spotlight-V100
+.Trashes
+Icon
+
+
+
+# ----------------------------------------------------------------------
+# | Windows                                                            |
+# ----------------------------------------------------------------------
+
+Desktop.ini
+ehthumbs.db
+Thumbs.db
+
